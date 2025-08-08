@@ -6,6 +6,7 @@ import { Code, Database, Github, Globe, Linkedin, Mail, Monitor, ExternalLink, S
 import { Button } from './components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card';
 import { Badge } from './components/ui/badge'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './components/ui/carousel';
 
 function App() {
     const skills = [
@@ -48,6 +49,13 @@ function App() {
     }
   ];
 
+  const images = [
+    "/vite.svg",
+    "/w3logo.jfif",
+    "/img3.png",
+    "/img4.png"
+  ]
+
   return ( 
         <div className='min-h-screen bg-black dark'>
             <header className='fixed top-0 w-full bg-black/80 backdrop-blur-sm border-b border-zinc-800'>
@@ -85,7 +93,7 @@ function App() {
                             Ver Projetos
                         </Button>
                         <Button variant="outline" size="lg" className='border-zinc-600 text-zinc-300 hover:bg-zinc-800'>
-                            Download CV
+                            <a href='/Currículo - João Ricardo Holanda Lima.pdf' download>Download CV</a>
                         </Button>
                     </div>
                     <div className='flex justify-center space-x-6 mt-8'>
@@ -103,10 +111,26 @@ function App() {
                         </h2>
                         <div className='grid md:grid-cols-2 gap-12 items-center'>
                             <div>
-                                <div className='w-full h-80 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-lg flex items-center justify-center'>
-                                    <div className='w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center'>
-                                        <Code className='w-12 h-12 text-white' />
-                                    </div>
+                                <div className='w-full h-96 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-lg flex items-center justify-center'>
+                                  
+                                        <Carousel className='w-full max-w-xs'>
+                                            <CarouselContent>
+                                              {images.map((image, i) => (
+                                                <CarouselItem key={i}>
+                                                  <div>
+                                                    <Card>
+                                                      <CardContent className='flex aspect-square items-center justify-center p-6'>
+                                                        <img src={image} alt={`img${i+1}`} className='w-full h-full'/>
+                                                      </CardContent>
+                                                    </Card>
+                                                  </div>
+                                                </CarouselItem>
+                                              ))}
+                                            </CarouselContent>
+                                            <CarouselPrevious />
+                                            <CarouselNext />
+                                        </Carousel>
+
                                 </div>
                             </div>
                             <div className='space-y-6'>
