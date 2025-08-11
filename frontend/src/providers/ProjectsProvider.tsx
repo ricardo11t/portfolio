@@ -30,9 +30,8 @@ export const ProjectsProvider = ({ children }: ProjectsProviderProps) => {
   const [projects, setProjects] = useState<ProjectType[]>([]);
 
   const fetchProjects = async () => {
-    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/projects`;
     try {
-      const response = await fetch(apiUrl);
+      const response = await fetch("/api/projects");
 
       if (!response.ok) {
         throw new Error(`Erro na API: ${response.statusText}`);

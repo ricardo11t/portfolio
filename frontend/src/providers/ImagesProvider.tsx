@@ -21,9 +21,8 @@ export const ImagesProvider = ({ children }: ImagesProviderProps) => {
   const [images, setImages] = useState<ImageType[]>([]);
 
   const fetchImages = async () => {
-    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/images`;
     try {
-      const response = await fetch(apiUrl);
+      const response = await fetch("/api/images");
 
       if (!response.ok) {
         throw new Error(`Erro na API: ${response.statusText}`);

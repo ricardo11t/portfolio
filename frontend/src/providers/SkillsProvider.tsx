@@ -20,9 +20,8 @@ export const SkillsProvider = ({ children }: SkillsProviderProps) => {
   const [skills, setSkills] = useState<SkillType[]>([]);
 
   const fetchSkills = async () => {
-    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/skills`;
     try {
-      const response = await fetch(apiUrl);
+      const response = await fetch("/api/skills");
 
       if (!response.ok) {
         throw new Error(`Erro na API: ${response.statusText}`);
