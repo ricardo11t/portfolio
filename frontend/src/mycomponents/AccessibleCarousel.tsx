@@ -1,146 +1,97 @@
-import React, { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import React, { useEffect, useState, useCallback } from 'react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-function AccessibleCarousel({ images = [], className = "" }) {
-  const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const containerRef = useRef(null);
+interface CarouselImage {
+  name: string;
+  src: string | null;
+  id?: number;
+}
 
-  const length = images?.length || 0;
-  useEffect(() => {
-    if (index >= length && length > 0) {
-      setIndex(0);
-    }
-  }, [length, index]);
+interface AccessibleCarouselProps {
+  images: CarouselImage[];
+}
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const onKey = (e) => {
-      if (e.key === "ArrowLeft") {
-        setIndex((i) => (length > 0 ? (i - 1 + length) % length : 0));
-      } else if (e.key === "ArrowRight") {
-        setIndex((i) => (length > 0 ? (i + 1) % length : 0));
-      }
-    };
-    el.addEventListener("keydown", onKey);
-    return () => el.removeEventListener("keydown", onKey);
-  }, [length]);
+export default function AccessibleCarousel({ images }: AccessibleCarouselProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prevIndex) => {
+      if (!images || images.length === 0) return 0;
+      return prevIndex === images.length - 1 ? 0 : prevIndex + 1;
+    });
+  }, [images.length]);
 
   useEffect(() => {
-    if (length <= 1) return;
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (media.matches) return;
-    const t = setInterval(() => {
-      if (!paused) setIndex((i) => (length > 0 ? (i + 1) % length : 0));
-    }, 4500);
-    return () => clearInterval(t);
-  }, [length, paused]);
+    if (images.length <= 1) return;
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || length <= 1) return;
-    let startX = 0;
-    const onTouchStart = (e) => {
-      startX = e.touches[0].clientX;
-    };
-    const onTouchEnd = (e) => {
-      const dx = e.changedTouches[0].clientX - startX;
-      if (Math.abs(dx) > 50) {
-        if (dx > 0) setIndex((i) => (i - 1 + length) % length);
-        else setIndex((i) => (i + 1) % length);
-      }
-    };
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchend", onTouchEnd);
-    return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchend", onTouchEnd);
-    };
-  }, [length]);
+    const intervalId = setInterval(goToNext, 6000);
+    return () => clearInterval(intervalId);
+  }, [images.length, goToNext]);
 
-  const prev = () => {
-    if (length <= 1) return;
-    setIndex((i) => (i - 1 + length) % length);
-  };
-  const next = () => {
-    if (length <= 1) return;
-    setIndex((i) => (i + 1) % length);
-  };
-
-  if (length === 0) {
-    return null;
+  if (!images || images.length === 0) {
+    return <div className="text-zinc-400">Nenhuma imagem para exibir.</div>;
   }
+  
+  const goToPrevious = () => {
+    const isFirstSlide = currentIndex === 0;
+    const newIndex = isFirstSlide ? images.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const goToSlide = (slideIndex: number) => {
+    setCurrentIndex(slideIndex);
+  };
+
+  const currentImage = images[currentIndex];
 
   return (
-    <div
-      ref={containerRef}
-      className={`w-full ${className}`}
-      role="region"
-      aria-roledescription="carousel"
-      aria-label="Galeria de imagens"
-      tabIndex={0}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      style={{ outlineOffset: 4 }}
-    >
-      <div className="relative overflow-hidden rounded-md" style={{ minHeight: 320 }}>
-        {images.map((src, i) => {
-          const offset = (i - index) * 100;
-          return (
-            <div
-              key={i}
-              className="absolute inset-0 w-full h-full transition-transform duration-700 ease-in-out"
-              style={{
-                transform: `translateX(${offset}%)`,
-                display: "block",
-                willChange: "transform",
-              }}
-              aria-hidden={i === index ? false : true}
-            >
-              <img
-                src={src}
-                alt={`Slide ${i + 1}`}
-                loading={i === index ? "eager" : "lazy"}
-                className="w-full h-80 object-contain bg-black/90 p-6"
-                style={{ maxHeight: 320 }}
-              />
-            </div>
-          );
-        })}
-      </div>
-
-      <button
-        type="button"
-        aria-label="Anterior"
-        onClick={prev}
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-zinc-400/90 p-2 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Próximo"
-        onClick={next}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-zinc-400/90 p-2 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <ArrowRight className="w-5 h-5" />
-      </button>
-
-      <div className="absolute left-1/2 -translate-x-1/2 flex gap-2">
-        {images.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`Ir para slide ${i + 1}`}
-            aria-pressed={i === index}
-            onClick={() => setIndex(i)}
-            className={`w-2 h-2 rounded-full ${i === index ? "bg-white" : "bg-white/40"}`}
+    <div className="relative w-full h-full group overflow-hidden rounded-xl" role="region" aria-label="Galeria de Imagens">
+      
+      <div className="w-full h-full flex items-center justify-center">
+        {currentImage && currentImage.src ? (
+          <img
+            key={currentImage.name || currentIndex}
+            src={currentImage.src}
+            alt={currentImage.name}
+            className="block w-full h-full object-contain transition-opacity duration-500"
           />
-        ))}
+        ) : (
+          <div className="text-zinc-400">Imagem indisponível</div>
+        )}
       </div>
+
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={goToPrevious}
+            className="absolute top-1/2 left-3 -translate-y-1/2 z-10 p-2 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white"
+            aria-label="Imagem Anterior"
+          >
+            <ArrowLeft size={24} />
+          </button>
+
+          <button
+            onClick={goToNext}
+            className="absolute top-1/2 right-3 -translate-y-1/2 z-10 p-2 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white"
+            aria-label="Próxima Imagem"
+          >
+            <ArrowRight size={24} />
+          </button>
+
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            {images.map((_, slideIndex) => (
+              <button
+                key={slideIndex}
+                onClick={() => goToSlide(slideIndex)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  currentIndex === slideIndex ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/70'
+                }`}
+                aria-label={`Ir para a imagem ${slideIndex + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
-
-export default AccessibleCarousel;

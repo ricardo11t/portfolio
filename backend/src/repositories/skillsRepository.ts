@@ -16,7 +16,7 @@ export default class SkillsRepository {
             if(rows.length === 0) {
                 return null;
             }
-            return rows.map(row => new SkillsModel(row.name, row.iconUrl, row.category))
+            return rows.map(row => new SkillsModel(row.id, row.name, row.iconUrl, row.category))
         } catch (e) {
             console.error(`[SkillsRepository getAll] Erro ao buscar skills.`);
             throw e;
@@ -31,8 +31,8 @@ export default class SkillsRepository {
             if(rows.length === 0) {
                 return null;
             }
-            const { name: skillName, iconurl: iconUrl, category: skillCategory } = rows[0];
-            return new SkillsModel(skillName, iconUrl, skillCategory);
+            const { id: id, name: skillName, iconurl: iconUrl, category: skillCategory } = rows[0];
+            return new SkillsModel(id, skillName, iconUrl, skillCategory);
         } catch (e) {
             console.error("[SkillsRepository findByName] Erro ao buscar skill por nome.");
             throw e;
@@ -51,7 +51,7 @@ export default class SkillsRepository {
                 throw new Error("Falha ao conseguir id da nova coluna criada.");
             }
 
-            return new SkillsModel(name, iconUrl, category);
+            return new SkillsModel(newId, name, iconUrl, category);
         } catch (e) {
             throw new Error("[SkillsRepository create] Erro na adição de uma nova skill: ", e);
         }

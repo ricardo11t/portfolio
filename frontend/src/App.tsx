@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext, use, useMemo } from "react";
 import "./App.css";
 import {
   Code,
@@ -26,61 +26,9 @@ import {
 } from "./components/ui/card";
 import { Badge } from "./components/ui/badge";
 import AccessibleCarousel from "./mycomponents/AccessibleCarousel";
-
-const skills = [
-  { name: "JavaScript", category: "Frontend" },
-  { name: "TypeScript", category: "Frontend" },
-  { name: "React", category: "Frontend" },
-  { name: "Next.js", category: "Frontend" },
-  { name: "HTML5", category: "Frontend" },
-  { name: "CSS3", category: "Frontend" },
-  { name: "Tailwind CSS", category: "Frontend" },
-  { name: "Node.js", category: "Backend" },
-  { name: "Express", category: "Backend" },
-  { name: "PostgreSQL", category: "Backend" },
-  { name: "MongoDB", category: "Backend" },
-  { name: "Git", category: "Tools" },
-  { name: "Docker", category: "Tools" },
-  { name: "AWS", category: "Cloud" },
-];
-
-const projects = [
-  {
-    title: "E-commerce Platform",
-    description:
-      "Plataforma completa de e-commerce com carrinho de compras, sistema de pagamentos e painel administrativo.",
-    tech: ["React", "Node.js", "PostgreSQL", "Stripe"],
-    github: "#",
-    demo: "#",
-    details:
-      "Caso de estudo: implementei autenticação, catálogo, checkout com Stripe e painel de administração. Deploy em Vercel + Heroku.",
-    image: "/proj-ecommerce.jpg",
-  },
-  {
-    title: "Task Management App",
-    description:
-      "Aplicativo de gerenciamento de tarefas com funcionalidades de colaboração em tempo real.",
-    tech: ["Next.js", "TypeScript", "MongoDB", "Socket.io"],
-    github: "#",
-    demo: "#",
-    details:
-      "Aplicativo com sincronização em tempo real usando Socket.io, e autenticação via JWT. Testes unitários com Jest.",
-    image: "/proj-tasks.jpg",
-  },
-  {
-    title: "Weather Dashboard",
-    description:
-      "Dashboard meteorológico com visualizações interativas e previsões detalhadas.",
-    tech: ["React", "Chart.js", "OpenWeather API", "Tailwind"],
-    github: "#",
-    demo: "#",
-    details:
-      "Dashboard com caching de API, gráficos de precipitação e performance otimizada para dispositivos móveis.",
-    image: "/proj-weather.jpg",
-  },
-];
-
-const carouselImages = ["/vite.svg", "/w3logo.jfif", "/img3.png", "/img4.png"];
+import { SkillsContext } from "./providers/SkillsProvider";
+import { ProjectsContext } from "./providers/ProjectsProvider";
+import { ImagesContext } from "./providers/ImagesProvider";
 
 function useActiveSection(setActive) {
   useEffect(() => {
@@ -145,19 +93,19 @@ function ProjectModal({ open, onClose, project }) {
           <h3 className="text-2xl text-white mb-2">{project.title}</h3>
           <p className="text-zinc-300 mb-4">{project.details || project.description}</p>
           <div className="flex flex-wrap gap-2 mb-4">
-            {project.tech.map((t, i) => (
-              <Badge key={i} className="bg-zinc-800 text-zinc-300">
-                {t}
+            {project.skills.map((skill) => (
+              <Badge key={skill.id} className="bg-zinc-800 text-zinc-300">
+                {skill.name}
               </Badge>
             ))}
           </div>
           <div className="flex gap-2 justify-end">
-            <a href={project.github} target="_blank" rel="noopener noreferrer">
+            <a href={project.github_url} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="border-zinc-700 text-zinc-300">
                 <Github className="w-4 h-4 mr-2" /> Código
               </Button>
             </a>
-            <a href={project.demo} target="_blank" rel="noopener noreferrer">
+            <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 Demo <ExternalLink className="w-4 h-4 ml-2" />
               </Button>
@@ -172,7 +120,88 @@ function ProjectModal({ open, onClose, project }) {
   );
 }
 
+
 export default function App() {
+  const {skills} = useContext(SkillsContext);
+  const {projects} = useContext(ProjectsContext);
+  const {images} = useContext(ImagesContext);
+
+const normalizeBase64 = (b64: string) => {
+  if (!b64) return '';
+  let cleaned = b64.replace(/\s+/g, '').replace(/[^A-Za-z0-9+/=]/g, '');
+  const pad = cleaned.length % 4;
+  if (pad > 0) cleaned += '='.repeat(4 - pad);
+  return cleaned;
+};
+
+const base64ToBlob = (base64OrDataUrl: string): Blob | null => {
+  if (!base64OrDataUrl) return null;
+  let base64 = base64OrDataUrl;
+  let mime = 'image/jpeg';
+  if (base64OrDataUrl.startsWith('data:')) {
+    const parts = base64OrDataUrl.split(',');
+    if (parts.length < 2) return null;
+    const meta = parts[0];
+    base64 = parts[1];
+    const m = meta.match(/data:([^;]+);/);
+    if (m) mime = m[1];
+  }
+
+  base64 = normalizeBase64(base64);
+  if (!/^[A-Za-z0-9+/]+=*$/.test(base64)) return null;
+
+  try {
+    const binary = atob(base64);
+    const len = binary.length;
+    const arr = new Uint8Array(len);
+    for (let i = 0; i < len; i++) arr[i] = binary.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  } catch {
+    return null;
+  }
+};
+const bufferToUrl = (buffer: any): string | null => {
+  if (!buffer) return null;
+
+  if (typeof buffer === 'string') {
+    if (buffer.startsWith('blob:') || buffer.startsWith('data:')) return buffer;
+    const blob = base64ToBlob(buffer);
+    if (blob) return URL.createObjectURL(blob);
+    return null;
+  }
+
+  const bytes = buffer.data instanceof Uint8Array ? buffer.data : new Uint8Array(buffer.data);
+
+  try {
+    const txt = new TextDecoder().decode(bytes).trim();
+    const maybe = normalizeBase64(txt);
+    if (/^[A-Za-z0-9+/]+=*$/.test(maybe.slice(0, 200))) {
+      const blob = base64ToBlob(maybe);
+      if (blob) return URL.createObjectURL(blob);
+    }
+  } catch { /* ignore */ }
+
+  let mime = 'image/jpeg';
+  if (bytes[0] === 0x89 && bytes[1] === 0x50) mime = 'image/png';
+  else if (bytes[0] === 0x47 && bytes[1] === 0x49) mime = 'image/gif';
+  const blob = new Blob([bytes], { type: mime });
+  return URL.createObjectURL(blob);
+};
+
+const carouselImages = images.map((img: any, i: number) => ({
+  id: i,
+  name: img.name,
+  src: bufferToUrl(img.blob)
+}));
+
+useEffect(() => {
+  return () => {
+    carouselImages.forEach(img => {
+      if (img.src?.startsWith('blob:')) URL.revokeObjectURL(img.src);
+    });
+  };
+}, [carouselImages]);
+
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [active, setActive] = useState("home");
@@ -338,7 +367,7 @@ export default function App() {
                 Ver Projetos
               </Button>
 
-              <a href="/Curriculo-Joao-Ricardo-Holanda-Lima.pdf" download className="inline-block">
+              <a href="/Currículo - João Ricardo Holanda Lima.pdf" download className="inline-block">
                 <Button variant="outline" size="lg" className="border-zinc-600 text-zinc-300 hover:bg-zinc-800" aria-label="Download do CV">
                   Download CV
                 </Button>
@@ -406,8 +435,9 @@ export default function App() {
             <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl md:text-4xl text-white text-center mb-12">Habilidades Técnicas</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {skills.map((skill, index) => (
-                  <div key={index} className="group">
+                {skills.map((skill) => (
+                  <div key={skill.id} className="group">
+                    <img src={skill.icon_url} />
                     <Badge variant="outline" className="w-full py-3 border-zinc-700 text-zinc-300 hover:border-blue-500 hover:text-blue-400 transition-all duration-200 cursor-default">
                       {skill.name}
                     </Badge>
@@ -423,28 +453,28 @@ export default function App() {
             <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl md:text-4xl text-white text-center mb-12">Projetos</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {projects.map((project, index) => (
-                  <Card key={index} className="bg-zinc-800 border-zinc-700 hover:border-zinc-600 transition-colors transform hover:-translate-y-1 motion-safe:transition-transform">
+                {projects.map((project) => (
+                  <Card key={project.id} className="bg-zinc-800 border-zinc-700 hover:border-zinc-600 transition-colors transform hover:-translate-y-1 motion-safe:transition-transform">
                     <CardHeader>
                       <CardTitle className="text-white text-lg">{project.title}</CardTitle>
                       <CardDescription className="text-zinc-400">{project.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {project.tech.map((tech, techIndex) => (
-                          <Badge key={techIndex} variant="secondary" className="bg-zinc-700 text-zinc-300">
-                            {tech}
+                        {project.skills.map((skill) => (
+                          <Badge key={skill.id} variant="secondary" className="bg-zinc-700 text-zinc-300">
+                            {skill.name}
                           </Badge>
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <a href={project.github} target="_blank" rel="noopener noreferrer">
+                        <a href={project.github_url} target="_blank" rel="noopener noreferrer">
                           <Button variant="outline" size="sm" className="border-zinc-600 text-zinc-300 hover:bg-zinc-700">
                             <Github className="w-4 h-4 mr-2" />
                             Código
                           </Button>
                         </a>
-                        <a href={project.demo} target="_blank" rel="noopener noreferrer">
+                        <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
                           <Button variant="outline" size="sm" className="border-zinc-600 text-zinc-300 hover:bg-zinc-700">
                             <ExternalLink className="w-4 h-4 mr-2" />
                             Demo
@@ -494,7 +524,7 @@ export default function App() {
 
         <footer className="py-8 bg-zinc-900 border-t border-zinc-800">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-zinc-400">© 2025 Portifólio Ricardo. Desenvolvido com React, Tailwind CSS e API em Express.</p>
+            <p className="text-zinc-400">© 2025 Portifólio Ricardo. Desenvolvido com React, Tailwind CSS e API em Express, Na linguagem TypeScript</p>
           </div>
         </footer>
       </main>

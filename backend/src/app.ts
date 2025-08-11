@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 import type { NextFunction, Request, Response, ErrorRequestHandler } from "express";
+import cors from "cors";
 import ImagesController from "./controllers/imageController";
 import ImagesRepository from "./repositories/imagesRepository";
 import ImagesService from "./services/imageService";
@@ -34,7 +35,11 @@ const app = express();
 const router = Router();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+app.use(cors());
 
 app.get("/", (req: Request, res: Response) => {
     return res.json({ message: "API está online!" });
@@ -50,7 +55,7 @@ router.get("/images", async (req: Request, res: Response, next: NextFunction) =>
     }
 });
 
-router.post("/images", async (req: Request, res: Response, next: NextFunction) => {
+router.post("/images", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.body.name) {
             const error: any = new Error('O parâmetro "name" é obrigatório.');
@@ -68,7 +73,7 @@ router.post("/images", async (req: Request, res: Response, next: NextFunction) =
     }
 });
 
-router.delete("/images", async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/images", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.body.name) {
             const error: any = new Error('O parâmetro "name" é obrigatório.');
@@ -85,13 +90,13 @@ router.delete("/images", async (req: Request, res: Response, next: NextFunction)
 
 router.get("/skills", async (req: Request, res: Response, next: NextFunction) => {
     try {
-       await skillsController.getAll(req, res); 
+        await skillsController.getAll(req, res); 
     } catch (error) {
         next(error);
     }
 });
 
-router.post("/skills", async (req: Request, res: Response, next: NextFunction) => {
+router.post("/skills", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
         if(!req.body.name) {
             const error: any = new Error("O parâmetro 'name' é obrigatório.");
@@ -114,7 +119,7 @@ router.post("/skills", async (req: Request, res: Response, next: NextFunction) =
     }
 });
 
-router.delete("/skills", async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/skills", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
         if(!req.body.name) {
             const error: any = new Error("O parâmetro 'name' é obrigatório.");
@@ -129,7 +134,15 @@ router.delete("/skills", async (req: Request, res: Response, next: NextFunction)
 
 // ==================================================================================== //
 
-router.post("/projects", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/projects", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await projectsController.getAll(req, res);
+    } catch (error) {
+        next(error);
+    }
+})
+
+router.post("/projects", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { title, description, skill_ids } = req.body;
         
@@ -142,9 +155,22 @@ router.post("/projects", async (req: Request, res: Response, next: NextFunction)
     }
 });
 
+router.delete("/projects", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+       if(!req.body.id) {
+            const error:any = new Error("O parâmetro 'id' é obrigatório");
+            error.status = 400;
+            return next(error);
+        }
+        await projectsController.delete(req, res); 
+    } catch (error) {
+        next(error);
+    }
+})
+
 // ==================================================================================== //
 
-app.use("/api", authMidleware, router);
+app.use("/api", router);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     res.status(404).json({ error: `A rota '${req.originalUrl}' não foi encontrada.` });

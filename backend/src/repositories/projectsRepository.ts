@@ -158,4 +158,18 @@ export default class ProjectRepository {
             throw new Error("Falha ao criar projeto no banco de dados.");
         }
     }
+
+    async delete(id: number): Promise<Boolean> {
+        try {
+            const result = await this.db`
+                    DELETE FROM projects WHERE \`id\` = ${id};    
+                `;
+            const metadata = result.rows as any; 
+            
+            return metadata.affectedRows > 0;
+        } catch (e) {
+            console.error("[ProjectsRepository delete] Erro ao deletar projeto: ", e);
+            throw new Error("Falha ao deletar projeto no banco de dados.");
+        }
+    }
 }

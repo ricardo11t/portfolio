@@ -15,7 +15,7 @@ export default class SkillsController {
 
     async getAll(req: Request, res: Response, next: NextFunction) {
         try {
-            const skills = this.skillsService.getAllSkills();
+            const skills = await this.skillsService.getAllSkills();
             res.status(200).json(skills);
         } catch (e) {
             next(e);
