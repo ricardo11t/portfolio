@@ -1,45 +1,50 @@
-import { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
-export const ImagesContext = createContext({
-    images: [],
-}); 
-export const ImagesProvider = ({ children }) => {
-    const [images, setImages] = useState([]);
-    
-    const fetchImages = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/api/images', {
-                method: "GET",
-            });
+type BufferInput = string | { data: Uint8Array | number[] };
 
-            if(!response.ok) {
-                throw new Error(`Erro na API: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-
-            let imagesArray = [];
-            
-            if(data && Array.isArray(data)) {
-                imagesArray = data;
-            } else {
-                console.warn("A resposta da API /api/images não é um array:", data);
-            }
-
-            setImages(imagesArray);
-        } catch (e) {
-            console.error("[ImagesProvider] Falha ao buscar imagens: ", e);
-            setImages([]);
-        }
-    } 
-
-    useEffect(() => {
-        fetchImages();
-    }, []);
-
-    return (
-        <ImagesContext.Provider value={{ images }}>
-            {children}
-        </ImagesContext.Provider>
-    )
+interface ImageType {
+  name: string;
+  blob: BufferInput;
 }
+
+interface ImagesContextType {
+  images: ImageType[];
+}
+
+interface ImagesProviderProps {
+  children: React.ReactNode;
+}
+
+export const ImagesContext = createContext({} as ImagesContextType);
+
+export const ImagesProvider = ({ children }: ImagesProviderProps) => {
+  const [images, setImages] = useState<ImageType[]>([]);
+
+  const fetchImages = async () => {
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/images`;
+    try {
+      const response = await fetch(apiUrl);
+
+      if (!response.ok) {
+        throw new Error(`Erro na API: ${response.statusText}`);
+      }
+
+      const data: ImageType[] = await response.json();
+      setImages(Array.isArray(data) ? data : []);
+
+    } catch (e) {
+      console.error("[ImagesProvider] Falha ao buscar imagens: ", e);
+      setImages([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
+  return (
+    <ImagesContext.Provider value={{ images }}>
+      {children}
+    </ImagesContext.Provider>
+  );
+};

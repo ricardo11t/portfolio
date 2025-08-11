@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useContext, use, useMemo } from "react";
+import  { useEffect, useState, useRef, useContext } from "react";
 import "./App.css";
 import {
   Code,
@@ -13,8 +13,6 @@ import {
   Moon,
   Menu,
   X,
-  ArrowLeft,
-  ArrowRight,
 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import {
@@ -30,7 +28,30 @@ import { SkillsContext } from "./providers/SkillsProvider";
 import { ProjectsContext } from "./providers/ProjectsProvider";
 import { ImagesContext } from "./providers/ImagesProvider";
 
-function useActiveSection(setActive) {
+interface SkillType {
+    id: number;
+    name: string;
+    icon_url: string;
+}
+
+interface ProjectType {
+  id: number;
+  title: string;
+  description: string;
+  details?: string;
+  skills: SkillType[];
+  github_url: string;
+  demo_url: string;
+}
+
+interface ImageType {
+  name: string;
+  blob: BufferInput;
+}
+
+type BufferInput = string | { data: Uint8Array | number[] };
+
+function useActiveSection(setActive: React.Dispatch<React.SetStateAction<string>>) {
   useEffect(() => {
     const sections = document.querySelectorAll("section[id]");
     if (!sections.length) return;
@@ -49,13 +70,20 @@ function useActiveSection(setActive) {
   }, [setActive]);
 }
 
-function ProjectModal({ open, onClose, project }) {
-  const modalRef = useRef(null);
+interface ProjectModalProps {
+  open: boolean;
+  onClose: () => void;
+  project: ProjectType | null;
+}
+
+function ProjectModal({ open, onClose, project }: ProjectModalProps) {
+  const modalRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
-    const trap = (e) => {
-      const focusable = modalRef.current?.querySelectorAll(
+    const trap = (e: KeyboardEvent) => {
+      if (!modalRef.current) return;
+      const focusable = modalRef.current.querySelectorAll<HTMLElement>(
         'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
       );
       if (!focusable || !focusable.length) return;
@@ -73,7 +101,7 @@ function ProjectModal({ open, onClose, project }) {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", trap);
-    setTimeout(() => modalRef.current?.querySelector("button, a, input")?.focus(), 0);
+    setTimeout(() => modalRef.current?.querySelector<HTMLElement>("button, a, input")?.focus(), 0);
     return () => document.removeEventListener("keydown", trap);
   }, [open, onClose]);
 
@@ -120,11 +148,10 @@ function ProjectModal({ open, onClose, project }) {
   );
 }
 
-
 export default function App() {
-  const {skills} = useContext(SkillsContext);
-  const {projects} = useContext(ProjectsContext);
-  const {images} = useContext(ImagesContext);
+  const { skills } = useContext(SkillsContext) as { skills: SkillType[] };
+  const { projects } = useContext(ProjectsContext) as { projects: ProjectType[] };
+  const { images } = useContext(ImagesContext) as { images: ImageType[] };
 
 const normalizeBase64 = (b64: string) => {
   if (!b64) return '';
@@ -160,7 +187,7 @@ const base64ToBlob = (base64OrDataUrl: string): Blob | null => {
     return null;
   }
 };
-const bufferToUrl = (buffer: any): string | null => {
+const bufferToUrl = (buffer: BufferInput): string | null => {
   if (!buffer) return null;
 
   if (typeof buffer === 'string') {
@@ -188,7 +215,7 @@ const bufferToUrl = (buffer: any): string | null => {
   return URL.createObjectURL(blob);
 };
 
-const carouselImages = images.map((img: any, i: number) => ({
+const carouselImages = images.map((img, i: number) => ({
   id: i,
   name: img.name,
   src: bufferToUrl(img.blob)
@@ -206,7 +233,7 @@ useEffect(() => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [active, setActive] = useState("home");
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
-  const [modalProject, setModalProject] = useState(null);
+  const [modalProject, setModalProject] = useState<ProjectType | null>(null);
 
   useActiveSection(setActive);
 
@@ -228,7 +255,7 @@ useEffect(() => {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
-  const scrollTo = (id) => {
+  const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });

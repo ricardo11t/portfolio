@@ -9,7 +9,7 @@ export const authMidleware = (req: Request, res: Response, next: NextFunction) =
             message: "Acesso não autorizado: chave de API não fornecida"
         });
     }
-
+    
     const parts = authHeader.split(" ");
     if(parts.length !== 2 || parts[0] !== 'ApiKey') {
         return res.status(401).json({

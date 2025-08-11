@@ -1,1 +1,41 @@
+version: '3.8'
 
+services:
+  frontend:
+    build: ./frontend/
+    container_name: portifolio_frontend
+    restart: unless-stopped
+    environment:
+      - VITE_API_BASE_URL=http://backend:3000
+    ports:
+      - "80:80"
+
+  backend:
+    build: ./backend/
+    container_name: portifolio_backend
+    restart: unless-stopped
+    environment:
+      - DB_HOST=mysql-db
+      - DB_USER=root
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - DB_DATABASE=${MYSQL_DATABASE}
+      - PORT=3000
+      - API_SECRET_KEY=${API_SECRET_KEY}
+    ports:
+      - "3001:3000"
+    depends_on:
+      - mysql-db
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: portifolio_db_mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+volumes:
+  mysql-data:
