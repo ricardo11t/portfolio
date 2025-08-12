@@ -16,7 +16,7 @@ export default class SkillsService {
             return [];
         }
         
-        return skills.map(skill => skill.toClientJSON());
+        return skills;
     }
 
     async addNewSkill(name: string, iconUrl: string, category: string): Promise<ISkills> {

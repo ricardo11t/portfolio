@@ -16,7 +16,7 @@ export default class SkillsRepository {
             if(rows.length === 0) {
                 return null;
             }
-            return rows.map(row => new SkillsModel(row.id, row.name, row.iconUrl, row.category))
+            return rows.map(row => new SkillsModel(row.id, row.name, row.iconurl, row.category))
         } catch (e) {
             console.error(`[SkillsRepository getAll] Erro ao buscar skills.`);
             throw e;
