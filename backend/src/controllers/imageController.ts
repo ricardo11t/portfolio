@@ -6,9 +6,6 @@ export default class ImagesController {
 
     constructor(imagesService: ImagesService) {
         this.imagesService = imagesService;
-        this.getAll = this.getAll.bind(this);
-        this.create = this.create.bind(this);
-        this.delete = this.delete.bind(this);
     }
 
     async getAll(req: Request, res: Response, next: NextFunction) {

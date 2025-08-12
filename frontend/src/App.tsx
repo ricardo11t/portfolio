@@ -31,7 +31,8 @@ import { ImagesContext } from "./providers/ImagesProvider";
 interface SkillType {
     id: number;
     name: string;
-    icon_url: string;
+    iconUrl: string;
+    category: string;
 }
 
 interface ProjectType {
@@ -122,7 +123,8 @@ function ProjectModal({ open, onClose, project }: ProjectModalProps) {
           <p className="text-zinc-300 mb-4">{project.details || project.description}</p>
           <div className="flex flex-wrap gap-2 mb-4">
             {project.skills.map((skill) => (
-              <Badge key={skill.id} className="bg-zinc-800 text-zinc-300">
+              <Badge key={skill.id} className="bg-zinc-800 text-zinc-300 gap-2">
+                <img className="h-4 w-4" src={`${skill.iconUrl}`} />                
                 {skill.name}
               </Badge>
             ))}
@@ -464,8 +466,8 @@ useEffect(() => {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {skills.map((skill) => (
                   <div key={skill.id} className="group">
-                    <img src={skill.icon_url} />
-                    <Badge variant="outline" className={`w-full py-3 ${theme === "dark" ? "border-zinc-700 text-zinc-300" : "border-zinc-300 text-zinc-700"} hover:border-blue-500 hover:text-blue-500 transition-all duration-200 cursor-default`}>
+                    <Badge variant="outline" className={`w-full gap-4 py-3 ${theme === "dark" ? "border-zinc-700 text-zinc-300" : "border-zinc-300 text-zinc-700"} hover:border-blue-500 hover:text-blue-500 transition-all duration-200 cursor-default`}>
+                      <img className="h-6 w-6" src={`${skill.iconUrl}`} />
                       {skill.name}
                     </Badge>
                   </div>

@@ -3,7 +3,8 @@ import React, { createContext, useEffect, useState } from "react";
 interface SkillType {
   id: number;
   name: string;
-  icon_url: string;
+  iconUrl: string;
+  category: string;
 }
 
 interface SkillsContextType {

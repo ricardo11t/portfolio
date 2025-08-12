@@ -8,9 +8,6 @@ export default class SkillsController {
             throw new Error("SkillsService é requerido.");
         }
         this.skillsService = skillsService;
-        this.getAll = this.getAll.bind(this);
-        this.create = this.create.bind(this);
-        this.delete = this.delete.bind(this);
     }
 
     async getAll(req: Request, res: Response, next: NextFunction) {
@@ -24,7 +21,7 @@ export default class SkillsController {
 
     async create(req: Request, res: Response, next: NextFunction) {
         try {
-                    const { name, iconUrl, category } = req.body;
+        const { name, iconUrl, category } = req.body;
         if(!name) {
             return res.status(400).json("O parâmetro 'name' é requerido.");
         } if(!iconUrl){
