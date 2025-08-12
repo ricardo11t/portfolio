@@ -121,43 +121,48 @@ export default class ProjectRepository {
         }
     }
 
-    async create(projectData: IProject, skillsIds: number[]): Promise<IProject> {
-        try {
-            await connection.beginTransaction();
+async create(projectData: any, skillIds: number[]) {
+    // 1. Pega uma conexão "emprestada" do pool
+    const conn = await connection.getConnection(); 
 
-            const projectSql = 'INSERT INTO projects (title, description, details, image_url, github_url, demo_url) VALUES (?, ?, ?, ?, ?, ?)';
-            const [projectResult] = await connection.execute(projectSql, [
-                projectData.title,
-                projectData.description,
-                projectData.details,
-                projectData.image_url,
-                projectData.github_url,
-                projectData.demo_url
-            ].map(param => param === undefined ? null : param));
+    try {
+        // 2. Inicia a transação NESSA conexão individual
+        await conn.beginTransaction();
 
-            const newProjectId = (projectResult as any).insertId;
+        const { title, description, details, image_url, github_url, demo_url } = projectData;
 
-            if(skillsIds && skillsIds.length > 0) {
-                const projectSkillsSql = 'INSERT INTO project_skills (project_id, skill_id) VALUES ?';
-                const values = skillsIds.map(skillId => [newProjectId, skillId]);
-                await connection.query(projectSkillsSql, [values]);
-            }
+        // 3. Insere na tabela 'projects'
+        const projectSql = `
+            INSERT INTO projects (title, description, details, image_url, github_url, demo_url) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        const [projectResult] = await conn.execute(projectSql, [title, description, details, image_url, github_url, demo_url]);
+        
+        const projectId = (projectResult as any).insertId;
 
-            await connection.commit();
-
-            const newProject = await this.findById(newProjectId);
-
-            if(!newProject) {
-                throw new Error("Não foi possível encontrar o projeto recém-criado.");
-            }
-
-            return newProject;
-        } catch (e) {
-            await connection.rollback();
-            console.error("[ProjectRepository create] Erro ao criar projeto: ", e);
-            throw new Error("Falha ao criar projeto no banco de dados.");
+        // 4. Insere na tabela de junção 'project_skills'
+        if (skillIds && skillIds.length > 0) {
+            const projectSkillsSql = 'INSERT INTO project_skills (project_id, skill_id) VALUES ?';
+            const values = skillIds.map(skillId => [projectId, skillId]);
+            await conn.query(projectSkillsSql, [values]);
         }
+
+        // 5. Se tudo deu certo, confirma a transação
+        await conn.commit();
+
+        return { id: projectId, ...projectData };
+
+    } catch (error) {
+        // 6. Se algo deu errado, desfaz tudo
+        await conn.rollback();
+        console.error("[ProjectRepository create] Erro na transação: ", error);
+        throw error;
+
+    } finally {
+        // 7. Devolve a conexão para o pool
+        conn.release();
     }
+}
 
     async delete(id: number): Promise<Boolean> {
         try {
