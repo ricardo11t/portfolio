@@ -31,6 +31,17 @@ export default class ProjectsController {
         }
     }
 
+    async update(req: Request, res: Response, next: NextFunction) {
+        try {
+            const {id} = req.params;
+            const updateFields = req.body;
+            const result = await this.projectsService.editProjectsFields(id, updateFields);
+            res.status(200).json(result);
+        } catch (e) {
+            next(e);
+        }
+    }
+
     async delete(req: Request, res: Response, next: NextFunction) {
         try {
             const { id } = req.body;

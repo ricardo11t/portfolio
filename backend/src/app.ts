@@ -155,6 +155,19 @@ router.post("/projects", authMidleware, async (req: Request, res: Response, next
     }
 });
 
+router.put("/projects/:id", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (Object.keys(req.body).length === 0 || !req.body) {
+            const error: any = new Error("O corpo (body) da requisição não pode ser vazio.");
+            error.status = 400;
+            return next(error);
+        }
+        await projectsController.update(req, res, next);
+    } catch (error) {
+        next(error);
+    } 
+})
+
 router.delete("/projects", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
        if(!req.body.id) {

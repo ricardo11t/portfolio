@@ -11,6 +11,16 @@ export interface IProject {
     skills: ISkills[];
 }
 
+export interface EDITIProject {
+    title?: string;
+    description?: string;
+    details?: string;
+    image_url?: string;
+    github_url?: string;
+    demo_url?: string;
+    skills_ids?: ISkills[];
+}
+
 export default class ProjectsModel {
     public id:number;
     public title:string;

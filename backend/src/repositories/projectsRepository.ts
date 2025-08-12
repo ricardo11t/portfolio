@@ -1,4 +1,4 @@
-import { IProject } from "../models/projectsModel";
+import { EDITIProject, IProject } from "../models/projectsModel";
 import { connection, DbClient } from "../utils/db";
 
 export default class ProjectRepository {
@@ -56,7 +56,7 @@ export default class ProjectRepository {
                     projectsMap[row.id].skills.push({
                         id: row.skill_id,
                         name: row.skill_name,
-                        iconurl: row.skill_iconurl,
+                        iconUrl: row.skill_iconurl,
                         category: row.skill_category
                     });
                 }
@@ -121,41 +121,72 @@ export default class ProjectRepository {
         }
     }
 
-async create(projectData: any, skillIds: number[]) {
-    const conn = await connection.getConnection(); 
+    async create(projectData: any, skillIds: number[]) {
+        const conn = await connection.getConnection(); 
 
-    try {
-        await conn.beginTransaction();
+        try {
+            await conn.beginTransaction();
 
-        const { title, description, details, image_url, github_url, demo_url } = projectData;
+            const { title, description, details, image_url, github_url, demo_url } = projectData;
 
-        const projectSql = `
-            INSERT INTO projects (title, description, details, image_url, github_url, demo_url) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        `;
-        const [projectResult] = await conn.execute(projectSql, [title, description, details, image_url, github_url, demo_url]);
+            const projectSql = `
+                INSERT INTO projects (title, description, details, image_url, github_url, demo_url) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            `;
+            const [projectResult] = await conn.execute(projectSql, [title, description, details, image_url, github_url, demo_url]);
         
-        const projectId = (projectResult as any).insertId;
+            const projectId = (projectResult as any).insertId;
 
-        if (skillIds && skillIds.length > 0) {
-            const projectSkillsSql = 'INSERT INTO project_skills (project_id, skill_id) VALUES ?';
-            const values = skillIds.map(skillId => [projectId, skillId]);
-            await conn.query(projectSkillsSql, [values]);
+            if (skillIds && skillIds.length > 0) {
+                const projectSkillsSql = 'INSERT INTO project_skills (project_id, skill_id) VALUES ?';
+                const values = skillIds.map(skillId => [projectId, skillId]);
+                await conn.query(projectSkillsSql, [values]);
+            }
+
+            await conn.commit();
+
+            return { id: projectId, ...projectData };
+
+        } catch (error) {
+            await conn.rollback();
+            console.error("[ProjectRepository create] Erro na transação: ", error);
+            throw error;
+
+        } finally {
+            conn.release();
         }
-
-        await conn.commit();
-
-        return { id: projectId, ...projectData };
-
-    } catch (error) {
-        await conn.rollback();
-        console.error("[ProjectRepository create] Erro na transação: ", error);
-        throw error;
-
-    } finally {
-        conn.release();
     }
-}
+
+    async updateFields(id: number, updatedFields: EDITIProject) {
+        const conn = await connection.getConnection(); 
+        try {
+            await conn.beginTransaction();
+
+            const { skills_ids, ...projectFields } = updatedFields;
+
+            if(Object.keys(projectFields).length > 0) {
+                const updateProjectSQL = 'UPDATE projects SET ? WHERE id = ?';
+                await conn.query(updateProjectSQL, [projectFields, id]);
+            }
+        
+            if(skills_ids !== undefined) {
+                const deleteSkillsSQL = 'DELETE FROM project_skills WHERE project_id = ?';
+                await conn.query(deleteSkillsSQL, [id]);
+                if(skills_ids.length > 0) {
+                    const insertSkillsSQL = 'INSERT INTO project_skills WHERE project_id = ?';
+                    const values = skills_ids.map(skillId => [id, skillId]);
+                    await conn.query(insertSkillsSQL, [values]);
+                }
+            }
+            await conn.commit();
+        } catch (e) {
+            await conn.rollback();
+            console.error("[ProjectsRepository update] Erro ao editar projeto: ", e);
+            throw new Error("Falha ao editar projeto no banco de dados.");
+        } finally {
+            conn.release();
+        }
+    }
 
     async delete(id: number): Promise<Boolean> {
         try {
