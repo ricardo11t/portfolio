@@ -262,11 +262,10 @@ useEffect(() => {
   };
 
   return (
-    <div className={`min-h-screen bg-black/90 text-zinc-200`}>
+    <div className={`min-h-screen ${theme === "dark" ? "bg-black/90 text-zinc-200" : "bg-zinc-100 text-zinc-800"}`}>
       <header
-        className={`fixed top-0 w-full z-50 transition-all :backdrop-blur-sm border-b border-zinc-800 ${
-          scrolled ? "py-2 shadow-md" : "py-4"
-        } ${theme === "dark" ? "bg-black/80 text-white" : "bg-white/80 text-black"}`}
+        className={`fixed top-0 w-full z-50 transition-all :backdrop-blur-sm border-b ${theme === "dark" ? "border-zinc-800 bg-black/80 text-white" : "border-zinc-200 bg-zinc-50/80 text-zinc-900"} ${scrolled ? "py-2 shadow-md" : "py-4"
+          }`}
       >
         <nav className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -278,7 +277,7 @@ useEffect(() => {
               {theme === "dark" ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-zinc-800" />}
             </button>
 
-            <div className={`text-xl font-medium  select-none`}>João Ricardo</div>
+            <div className={`text-xl font-medium  select-none`}>Ricardo Holanda</div>
           </div>
 
           <div className="hidden md:flex items-center gap-6">
@@ -288,7 +287,7 @@ useEffect(() => {
                 e.preventDefault();
                 scrollTo("home");
               }}
-              className={`transition-colors ${active === "home" ? "text-white" : "text-zinc-300 hover:text-white"}`}
+              className={`transition-colors ${active === "home" ? "text-blue-600" : "text-zinc-600 hover:text-blue-600"}`}
             >
               Home
             </a>
@@ -298,7 +297,7 @@ useEffect(() => {
                 e.preventDefault();
                 scrollTo("about");
               }}
-              className={`transition-colors ${active === "about" ? "text-white" : "text-zinc-300 hover:text-white"}`}
+              className={`transition-colors ${active === "about" ? "text-blue-600" : "text-zinc-600 hover:text-blue-600"}`}
             >
               About
             </a>
@@ -308,7 +307,7 @@ useEffect(() => {
                 e.preventDefault();
                 scrollTo("skills");
               }}
-              className={`transition-colors ${active === "skills" ? "text-white" : "text-zinc-300 hover:text-white"}`}
+              className={`transition-colors ${active === "skills" ? "text-blue-600" : "text-zinc-600 hover:text-blue-600"}`}
             >
               Skills
             </a>
@@ -318,7 +317,7 @@ useEffect(() => {
                 e.preventDefault();
                 scrollTo("projects");
               }}
-              className={`transition-colors ${active === "projects" ? "text-white" : "text-zinc-300 hover:text-white"}`}
+              className={`transition-colors ${active === "projects" ? "text-blue-600" : "text-zinc-600 hover:text-blue-600"}`}
             >
               Projects
             </a>
@@ -328,7 +327,7 @@ useEffect(() => {
                 e.preventDefault();
                 scrollTo("contact");
               }}
-              className={`transition-colors ${active === "contact" ? "text-white" : "text-zinc-300 hover:text-white"}`}
+              className={`transition-colors ${active === "contact" ? "text-blue-600" : "text-zinc-600 hover:text-blue-600"}`}
             >
               Contacts
             </a>
@@ -347,7 +346,7 @@ useEffect(() => {
         </nav>
 
         {mobileOpen && (
-          <div className="md:hidden border-t border-zinc-800 bg-black/95">
+          <div className={`md:hidden border-t ${theme === "dark" ? "border-zinc-800 bg-black/95" : "border-zinc-200 bg-white/95"}`}>
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
               {["home", "about", "skills", "projects", "contact"].map((id) => (
                 <a
@@ -358,7 +357,7 @@ useEffect(() => {
                     scrollTo(id);
                     setMobileOpen(false);
                   }}
-                  className={`py-2 px-3 rounded transition-colors ${active === id ? "bg-zinc-800 text-white" : "text-zinc-300 hover:bg-zinc-900"}`}
+                  className={`py-2 px-3 rounded transition-colors ${active === id ? "bg-blue-100 text-blue-800" : "text-zinc-600 hover:bg-zinc-100"}`}
                 >
                   {id.charAt(0).toUpperCase() + id.slice(1)}
                 </a>
@@ -369,7 +368,8 @@ useEffect(() => {
       </header>
 
       <main className="pt-24">
-        <section id="home" className={`min-h-screen flex items-center justify-center bg-gradient-to-t ${theme === "dark" ? "from-black to-zinc-900" : "from-white to-zinc-900"} scroll-mt-20`}>
+        <section id="home" className={`min-h-screen flex items-center justify-center bg-gradient-to-t ${theme === "dark" ? "from-black to-zinc-900" : "from-zinc-200 to-zinc-50"
+          } scroll-mt-20`}>
           <div className="container mx-auto px-4 text-center">
             <div className="mb-8">
               <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
@@ -377,12 +377,12 @@ useEffect(() => {
               </div>
             </div>
 
-            <h1 className="text-4xl md:text-6xl text-white mb-4">
+            <h1 className={` text-4xl md:text-5xl font-bold mb-4 ${theme === "dark" ? " text-white" : " text-zinc-900"}`}>
               Desenvolvedor{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Fullstack</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-800">Fullstack</span>
             </h1>
-            <p className="text-xl md:text-2xl text-zinc-400 mb-8 max-w-3xl mx-auto">
-              Desenvolvedor apaixonado por criar soluções digitais e inovadoras, com tecnologias modernas
+            <p className={`text-xl md:text-2xl mb-8 max-w-3xl mx-auto ${theme === "dark" ? "text-zinc-400" : "text-zinc-600"}`}>
+              Desenvolvedor apaixonado por programação, desenvolvimento web e desenvolvimento de software
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -395,58 +395,58 @@ useEffect(() => {
               </Button>
 
               <a href="/Currículo - João Ricardo Holanda Lima.pdf" download className="inline-block">
-                <Button variant="outline" size="lg" className="border-zinc-600 text-zinc-300 hover:bg-zinc-800" aria-label="Download do CV">
+                <Button variant="outline" size="lg" className={`${theme === "dark" ? "border-zinc-600 text-zinc-300 hover:bg-zinc-800" : "border-zinc-300 text-zinc-700 hover:bg-zinc-200"}`} aria-label="Download do CV">
                   Download CV
                 </Button>
               </a>
             </div>
 
             <div className="flex justify-center space-x-6 mt-8">
-              <a href="https://github.com/ricardo11t" className="text-zinc-300 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/ricardo11t" className={`${theme === "dark" ? "text-zinc-300 hover:text-white" : "text-zinc-600 hover:text-blue-500"} transition-colors`} target="_blank" rel="noopener noreferrer">
                 <Github className="w-6 h-6" />
               </a>
-              <a href="https://www.linkedin.com/in/joão-ricardo-257059363" className="text-zinc-300 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.linkedin.com/in/joão-ricardo-257059363" className={`${theme === "dark" ? "text-zinc-300 hover:text-white" : "text-zinc-600 hover:text-blue-500"} transition-colors`} target="_blank" rel="noopener noreferrer">
                 <Linkedin className="w-6 h-6" />
               </a>
-              <a href="mailto:ricardo11t.dev@gmail.com" className="text-zinc-300 hover:text-white transition-colors">
+              <a href="mailto:ricardo11t.dev@gmail.com" className={`${theme === "dark" ? "text-zinc-300 hover:text-white" : "text-zinc-600 hover:text-blue-500"} transition-colors`}>
                 <Mail className="w-6 h-6" />
               </a>
             </div>
           </div>
         </section>
 
-        <section id="about" className="py-20 bg-zinc-900 scroll-mt-20">
+        <section id="about" className={`py-20 ${theme === "dark" ? "bg-zinc-900" : "bg-white"} scroll-mt-20`}>
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl text-white text-center mb-12">Sobre Mim</h2>
+              <h2 className={`text-3xl md:text-4xl text-center mb-12 ${theme === "dark" ? "text-white" : "text-zinc-900"}`}>
+                Sobre Mim
+              </h2>
               <div className="grid md:grid-cols-2 gap-12 items-center relative">
                 <div>
-                  <div className="w-full h-96 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-xl flex items-center justify-center p-6">
+                  <div className="w-full h-96 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-xl flex items-center justify-center p-6">
                     <AccessibleCarousel images={carouselImages} />
                   </div>
                 </div>
-
                 <div className="space-y-6">
-                    <p className="text-zinc-300 text-lg leading-relaxed">
-                        Meu nome é João Ricardo, mas pode me chamar de Ricardo.
-                    </p>
-                    <p className="text-zinc-300 text-lg leading-relaxed">
-                    Sou um desenvolvedor fullstack com paixão por tecnologia e inovação. Tenho experiência em desenvolvimento web moderno, desde interfaces responsivas até APIs robustas e escaláveis.
-                    </p>
-                  
-                  <p className="text-zinc-300 text-lg leading-relaxed">
-                    Sempre em busca de novos desafios e oportunidades para crescer profissionalmente, estou constantemente aprendendo novas tecnologias e melhores práticas de desenvolvimento.
+                  <p className={`text-lg leading-relaxed ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}>
+                    Tenho experiência com React, Node.js, TypeScript e bancos de dados relacionais. Gosto de criar soluções eficientes e escaláveis, sempre focando na experiência do usuário.
+                  </p>
+                  <p className={`text-lg leading-relaxed ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}>
+                    Já participei de projetos colaborativos, contribuindo tanto no frontend quanto no backend, e estou sempre aberto a aprender novas tecnologias e metodologias.
+                  </p>
+                  <p className={`text-lg leading-relaxed ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}>
+                    Meu objetivo é crescer como desenvolvedor, contribuir para projetos inovadores e ajudar empresas a alcançarem seus objetivos através da tecnologia.
                   </p>
                   <div className="flex flex-wrap gap-4">
-                    <div className="flex items-center gap-2 text-blue-400">
+                    <div className="flex items-center gap-2 text-blue-600">
                       <Globe className="w-5 h-5" />
                       <span>Frontend</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-400">
+                    <div className="flex items-center gap-2 text-green-600">
                       <Database className="w-5 h-5" />
                       <span>Backend</span>
                     </div>
-                    <div className="flex items-center gap-2 text-purple-400">
+                    <div className="flex items-center gap-2 text-purple-600">
                       <Monitor className="w-5 h-5" />
                       <span>Desktop</span>
                     </div>
@@ -457,15 +457,15 @@ useEffect(() => {
           </div>
         </section>
 
-        <section id="skills" className={`py-20 bg-gradient-to-bl ${theme === "dark" ? "from-black to-black" : "from-zinc-600 to-white"} scroll-mt-20`}>
+        <section id="skills" className={`py-20 bg-gradient-to-t ${theme === "dark" ? "from-black to-zinc-900" : "from-zinc-100 to-white"} scroll-mt-20`}>
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl md:text-4xl text-white text-center mb-12">Habilidades Técnicas</h2>
+              <h2 className={`text-3xl md:text-4xl text-center mb-12 ${theme === "dark" ? "text-white" : "text-zinc-900"}`}>Habilidades Técnicas</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {skills.map((skill) => (
                   <div key={skill.id} className="group">
                     <img src={skill.icon_url} />
-                    <Badge variant="outline" className="w-full py-3 border-zinc-700 text-zinc-300 hover:border-blue-500 hover:text-blue-400 transition-all duration-200 cursor-default">
+                    <Badge variant="outline" className={`w-full py-3 ${theme === "dark" ? "border-zinc-700 text-zinc-300" : "border-zinc-300 text-zinc-700"} hover:border-blue-500 hover:text-blue-500 transition-all duration-200 cursor-default`}>
                       {skill.name}
                     </Badge>
                   </div>
@@ -475,34 +475,34 @@ useEffect(() => {
           </div>
         </section>
 
-        <section id="projects" className="py-20 bg-zinc-900 scroll-mt-20">
+        <section id="projects" className={`py-20 ${theme === "dark" ? "bg-zinc-900" : "bg-white"} scroll-mt-20`}>
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl md:text-4xl text-white text-center mb-12">Projetos</h2>
+              <h2 className={`text-3xl md:text-4xl text-center mb-12 ${theme === "dark" ? "text-white" : "text-zinc-900"}`}>Projetos</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {projects.map((project) => (
-                  <Card key={project.id} className="bg-zinc-800 border-zinc-700 hover:border-zinc-600 transition-colors transform hover:-translate-y-1 motion-safe:transition-transform">
+                  <Card key={project.id} className={`${theme === "dark" ? "bg-zinc-800 border-zinc-700 hover:border-zinc-600" : "bg-zinc-100 border-zinc-300 hover:border-zinc-400"} transition-colors transform hover:-translate-y-1 motion-safe:transition-transform`}>
                     <CardHeader>
-                      <CardTitle className="text-white text-lg">{project.title}</CardTitle>
-                      <CardDescription className="text-zinc-400">{project.description}</CardDescription>
+                      <CardTitle className={`${theme === "dark" ? "text-white" : "text-zinc-900"} text-lg`}>{project.title}</CardTitle>
+                      <CardDescription className={`${theme === "dark" ? "text-zinc-400" : "text-zinc-600"}`}>{project.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-2 mb-4">
                         {project.skills.map((skill) => (
-                          <Badge key={skill.id} variant="secondary" className="bg-zinc-700 text-zinc-300">
+                          <Badge key={skill.id} variant="secondary" className={`${theme === "dark" ? "bg-zinc-700 text-zinc-300" : "bg-zinc-200 text-zinc-700"}`}>
                             {skill.name}
                           </Badge>
                         ))}
                       </div>
                       <div className="flex gap-2">
                         <a href={project.github_url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="outline" size="sm" className="border-zinc-600 text-zinc-300 hover:bg-zinc-700">
+                          <Button variant="outline" size="sm" className={`${theme === "dark" ? "border-zinc-600 text-zinc-300 hover:bg-zinc-700" : "border-zinc-300 text-zinc-700 hover:bg-zinc-200"}`}>
                             <Github className="w-4 h-4 mr-2" />
                             Código
                           </Button>
                         </a>
                         <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="outline" size="sm" className="border-zinc-600 text-zinc-300 hover:bg-zinc-700">
+                          <Button variant="outline" size="sm" className={`${theme === "dark" ? "border-zinc-600 text-zinc-300 hover:bg-zinc-700" : "border-zinc-300 text-zinc-700 hover:bg-zinc-200"}`}>
                             <ExternalLink className="w-4 h-4 mr-2" />
                             Demo
                           </Button>
@@ -510,7 +510,7 @@ useEffect(() => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-zinc-600 text-zinc-300 hover:bg-zinc-700 ml-auto"
+                          className={`${theme === "dark" ? "border-zinc-600 text-zinc-300 hover:bg-zinc-700" : "border-zinc-300 text-zinc-700 hover:bg-zinc-200"} ml-auto`}
                           onClick={() => setModalProject(project)}
                         >
                           Ver detalhes
@@ -523,12 +523,12 @@ useEffect(() => {
             </div>
           </div>
         </section>
-                        
-        <section id="contact" className={`py-20 bg-gradient-to-tl ${theme === "dark" ? "bg-black" : "from-zinc-600 to-white"} scroll-mt-20`}>
+
+        <section id="contact" className={`py-20 bg-gradient-to-t ${theme === "dark" ? "from-black to-zinc-900" : "from-zinc-100 to-white"} scroll-mt-20`}>
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
-              <h2 className={`text-3xl md:text-4xl text-white mb-8`}>Se interessou pelo meu trabalho?</h2>
-              <p className="text-xl text-zinc-300 mb-12">
+              <h2 className={`text-3xl md:text-4xl mb-8 ${theme === "dark" ? "text-white" : "text-zinc-900"}`}>Se interessou pelo meu trabalho?</h2>
+              <p className={`text-xl mb-12 ${theme === "dark" ? "text-zinc-300" : "text-zinc-700"}`}>
                 Estou sempre aberto a novas oportunidades e projetos interessantes. Entre em contato e vamos conversar!
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -539,7 +539,7 @@ useEffect(() => {
                   </Button>
                 </a>
                 <a href="https://www.linkedin.com/in/joão-ricardo-257059363" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="lg" className="border-zinc-600 text-zinc-300 hover:bg-zinc-800">
+                  <Button variant="outline" size="lg" className={`${theme === "dark" ? "border-zinc-600 text-zinc-300 hover:bg-zinc-800" : "border-zinc-300 text-zinc-700 hover:bg-zinc-200"}`}>
                     <Linkedin className="w-5 h-5 mr-2" />
                     LinkedIn
                   </Button>
@@ -549,9 +549,9 @@ useEffect(() => {
           </div>
         </section>
 
-        <footer className="py-8 bg-zinc-900 border-t border-zinc-800">
+        <footer className={`py-8 ${theme === "dark" ? "bg-zinc-900" : "bg-white"} border-t ${theme === "dark" ? "border-zinc-800" : "border-zinc-200"}`}>
           <div className="container mx-auto px-4 text-center">
-            <p className="text-zinc-400">© 2025 Portifólio Ricardo. Desenvolvido com React, Tailwind CSS e API em Express, Na linguagem TypeScript</p>
+            <p className={`${theme === "dark" ? "text-zinc-400" : "text-zinc-600"}`}>© 2025 Portifólio Ricardo Holanda. Desenvolvido com React, Tailwind CSS e API em Express, na linguagem TypeScript. Hospedado em instância EC2 da AWS.</p>
           </div>
         </footer>
       </main>
