@@ -122,16 +122,13 @@ export default class ProjectRepository {
     }
 
 async create(projectData: any, skillIds: number[]) {
-    // 1. Pega uma conexão "emprestada" do pool
     const conn = await connection.getConnection(); 
 
     try {
-        // 2. Inicia a transação NESSA conexão individual
         await conn.beginTransaction();
 
         const { title, description, details, image_url, github_url, demo_url } = projectData;
 
-        // 3. Insere na tabela 'projects'
         const projectSql = `
             INSERT INTO projects (title, description, details, image_url, github_url, demo_url) 
             VALUES (?, ?, ?, ?, ?, ?)
@@ -140,26 +137,22 @@ async create(projectData: any, skillIds: number[]) {
         
         const projectId = (projectResult as any).insertId;
 
-        // 4. Insere na tabela de junção 'project_skills'
         if (skillIds && skillIds.length > 0) {
             const projectSkillsSql = 'INSERT INTO project_skills (project_id, skill_id) VALUES ?';
             const values = skillIds.map(skillId => [projectId, skillId]);
             await conn.query(projectSkillsSql, [values]);
         }
 
-        // 5. Se tudo deu certo, confirma a transação
         await conn.commit();
 
         return { id: projectId, ...projectData };
 
     } catch (error) {
-        // 6. Se algo deu errado, desfaz tudo
         await conn.rollback();
         console.error("[ProjectRepository create] Erro na transação: ", error);
         throw error;
 
     } finally {
-        // 7. Devolve a conexão para o pool
         conn.release();
     }
 }

@@ -49,7 +49,7 @@ app.get("/", (req: Request, res: Response) => {
 
 router.get("/images", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await imagesController.getAll(req, res);
+        await imagesController.getAll(req, res, next);
     } catch (error) {
         next(error);
     }
@@ -67,7 +67,7 @@ router.post("/images", authMidleware, async (req: Request, res: Response, next: 
             error.status = 400;
             return next(error);
         }
-        await imagesController.create(req, res);
+        await imagesController.create(req, res, next);
     } catch (error) {
         next(error);
     }
@@ -80,7 +80,7 @@ router.delete("/images", authMidleware, async (req: Request, res: Response, next
             error.status = 400;
             return next(error);
         }
-        await imagesController.delete(req, res);
+        await imagesController.delete(req, res, next);
     } catch (error) {
         next(error);
     }
@@ -90,7 +90,7 @@ router.delete("/images", authMidleware, async (req: Request, res: Response, next
 
 router.get("/skills", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await skillsController.getAll(req, res); 
+        await skillsController.getAll(req, res, next); 
     } catch (error) {
         next(error);
     }
@@ -113,7 +113,7 @@ router.post("/skills", authMidleware, async (req: Request, res: Response, next: 
             error.status = 400;
             return next(error);
         }
-        await skillsController.create(req, res);
+        await skillsController.create(req, res, next);
     } catch (error) {
         next(error);
     }
@@ -126,7 +126,7 @@ router.delete("/skills", authMidleware, async (req: Request, res: Response, next
             error.status = 400;
             return next(error);
         }
-        await skillsController.delete(req, res);
+        await skillsController.delete(req, res, next);
     } catch (error) {
         next(error);
     }
@@ -136,7 +136,7 @@ router.delete("/skills", authMidleware, async (req: Request, res: Response, next
 
 router.get("/projects", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await projectsController.getAll(req, res);
+        await projectsController.getAll(req, res, next);
     } catch (error) {
         next(error);
     }
@@ -147,9 +147,9 @@ router.post("/projects", authMidleware, async (req: Request, res: Response, next
         const { title, description, skill_ids } = req.body;
         
         if(!title || !description || !skill_ids) {
-            return res.status(400).json("Algum dos campos obrigatórios está vazio.");
+            return res.status(400).json("pos obrigatórios está vazio.");
         }
-        await projectsController.create(req, res);
+        await projectsController.create(req, res, next);
     } catch (error) {
         next(error);
     }
@@ -162,7 +162,7 @@ router.delete("/projects", authMidleware, async (req: Request, res: Response, ne
             error.status = 400;
             return next(error);
         }
-        await projectsController.delete(req, res); 
+        await projectsController.delete(req, res, next); 
     } catch (error) {
         next(error);
     }
