@@ -1,5 +1,5 @@
-import SkillsModel, { ISkills } from "../models/skillsModel";
-import { DbClient } from "../utils/db";
+import SkillsModel, { EDITISkills, ISkills } from "../models/skillsModel";
+import { connection, DbClient } from "../utils/db";
 
 export default class SkillsRepository {
     public db: DbClient;
@@ -53,7 +53,35 @@ export default class SkillsRepository {
 
             return new SkillsModel(newId, name, iconUrl, category);
         } catch (e) {
-            throw new Error("[SkillsRepository create] Erro na adição de uma nova skill: ", e);
+            console.error("[SkillsRepository create] Erro na adição de uma nova skill: ", e);
+            throw e;
+        }
+    }
+
+    async update(id: number, updateFields: Partial<Omit<ISkills, 'id'>>): Promise<ISkills> {
+        const conn = await connection.getConnection();
+
+        try {
+            await conn.beginTransaction();
+            const { ...skillFields } = updateFields;
+
+            if(Object.keys(skillFields).length > 0) {
+                const updateSkillsSQL = 'UPDATE skills SET ? WHERE id = ?'; 
+                await conn.query(updateSkillsSQL, [updateFields, id]);
+            }
+            const [rows] = await conn.query('SELECT * FROM skills WHERE id = ?', [id]);
+            if (!Array.isArray(rows) || rows.length === 0) {
+                throw new Error(`Skill com ID ${id} não encontrada após a atualização.`);
+            }
+            const updatedSkill = (rows as ISkills[])[0];
+            await conn.commit();
+            return updatedSkill;
+        } catch (e) {
+            await conn.rollback();
+            console.error("[SkillsRepository update] Erro ao atualizar skill: ", e);
+            throw e;
+        } finally {
+            conn.release();
         }
     }
 

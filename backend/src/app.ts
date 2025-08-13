@@ -119,6 +119,24 @@ router.post("/skills", authMidleware, async (req: Request, res: Response, next: 
     }
 });
 
+router.put("/skills/:id", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if(!req.params) {
+            const error: any = new Error("O parâmetro 'name' é obrigatório.");
+            error.status = 400;
+            return next(error);
+        }
+        if(!req.body) {
+            const error: any = new Error("Pelo menos um campo tem que ser alterado.");
+            error.status = 400;
+            return next(error);
+        }
+        await skillsController.update(req, res, next);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.delete("/skills", authMidleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
         if(!req.body.name) {

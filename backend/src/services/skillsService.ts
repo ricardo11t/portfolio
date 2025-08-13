@@ -29,6 +29,11 @@ export default class SkillsService {
         return newImage
     }
 
+    async updateASkill(id: number, updateFields: Partial<Omit<ISkills, 'id'>>): Promise<ISkills> {
+        const updatedSkill = await this.skillsRepository.update(id, updateFields);
+        return updatedSkill;
+    }
+
     async deleteSkill(name: string) {
         const wasDeleted = await this.skillsRepository.delete(name);
         if(!wasDeleted) {

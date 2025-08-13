@@ -5,6 +5,8 @@ export interface ISkills {
     category: string;
 }
 
+export type EDITISkills = Partial<Omit<ISkills, 'id'>>
+
 export default class SkillsModel {
     public id: number;
     public name:string;
