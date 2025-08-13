@@ -157,24 +157,24 @@ export default class ProjectRepository {
         }
     }
 
-    async updateFields(id: number, updatedFields: EDITIProject) {
+    async updateFields(id: number, updatedFields: Partial<Omit<IProject, 'id'>>) {
         const conn = await connection.getConnection(); 
         try {
             await conn.beginTransaction();
 
-            const { skills_ids, ...projectFields } = updatedFields;
+            const { skills, ...projectFields } = updatedFields;
 
             if(Object.keys(projectFields).length > 0) {
                 const updateProjectSQL = 'UPDATE projects SET ? WHERE id = ?';
                 await conn.query(updateProjectSQL, [projectFields, id]);
             }
         
-            if(skills_ids !== undefined) {
+            if(skills !== undefined) {
                 const deleteSkillsSQL = 'DELETE FROM project_skills WHERE project_id = ?';
                 await conn.query(deleteSkillsSQL, [id]);
-                if(skills_ids.length > 0) {
+                if(skills.length > 0) {
                     const insertSkillsSQL = 'INSERT INTO project_skills WHERE project_id = ?';
-                    const values = skills_ids.map(skillId => [id, skillId]);
+                    const values = skills.map(skillId => [id, skillId]);
                     await conn.query(insertSkillsSQL, [values]);
                 }
             }

@@ -37,6 +37,23 @@ export default class SkillsController {
         }
     }
 
+    async update(req: Request, res: Response, next: NextFunction) {
+        try {
+            const {id} = req.params;
+            const updateFields = req.body;
+            if(!id) {
+                return res.status(400).json("O parâmetro 'id' é obrigatório.");
+            }
+            if(!updateFields) {
+                return res.status(400).json("O body não pode estar vazio.");
+            }
+            const updatedSkill = this.skillsService.updateASkill(id, updateFields);
+            res.status(200).json(updatedSkill);
+        } catch (e) {
+            next(e);
+        }
+    }
+
     async delete(req: Request, res: Response, next: NextFunction) {
         try {
         const { name } = req.body;
