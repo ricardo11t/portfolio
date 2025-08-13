@@ -11,7 +11,7 @@ export default class SkillsRepository {
     async getAll(): Promise<SkillsModel[] | null> {
         try {
             const { rows } = await this.db`
-                SELECT * FROM skills;
+                SELECT * FROM skills ORDER BY RAND();
                 `;
             if(rows.length === 0) {
                 return null;

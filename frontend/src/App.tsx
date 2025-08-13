@@ -150,15 +150,6 @@ function ProjectModal({ open, onClose, project }: ProjectModalProps) {
   );
 }
 
-function shuffleArray<T>(array: T[]): T[] {
-    const shuffledArray = [...array];
-    for(let i=shuffledArray.length - 1; i>0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
-    }
-    return shuffledArray;
-}
-
 export default function App() {
   const { skills } = useContext(SkillsContext) as { skills: SkillType[] };
   const { projects } = useContext(ProjectsContext) as { projects: ProjectType[] };
@@ -171,8 +162,6 @@ const normalizeBase64 = (b64: string) => {
   if (pad > 0) cleaned += '='.repeat(4 - pad);
   return cleaned;
 };
-    
-   const shuffledSkillArray = shuffleArray(skills); 
 
 const base64ToBlob = (base64OrDataUrl: string): Blob | null => {
   if (!base64OrDataUrl) return null;
@@ -475,7 +464,7 @@ useEffect(() => {
             <div className="max-w-6xl mx-auto">
               <h2 className={`text-3xl md:text-4xl text-center mb-12 ${theme === "dark" ? "text-white" : "text-zinc-900"}`}>Habilidades Técnicas</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {shuffledSkillArray.map((skill) => (
+                {skills.map((skill) => (
                   <div key={skill.id} className="group">
                     <Badge variant="outline" className={`w-full gap-4 py-3 ${theme === "dark" ? "border-zinc-700 text-zinc-300" : "border-zinc-300 text-zinc-700"} hover:border-blue-500 hover:text-blue-500 transition-all duration-200 cursor-default`}>
                       <img className="h-6 w-6" src={`${skill.iconUrl}`} />
