@@ -45,39 +45,38 @@ const SkillGlobe: React.FC<SkillGlobeProps> = ({
 const skillPositions = useMemo(() => {
   const numSkills = skills.length;
 
-  // Ajusta dinamicamente para telas menores
   const isMobile = window.innerWidth < 768;
-  const radiusFactor = isMobile ? 0.6 : 1;
-  const iconFactor = isMobile ? 0.7 : 1;
+  const horizontalRadius = effectiveRadius * (isMobile ? 0.8 : 1.2); // abre mais no desktop
+  const verticalRadius = effectiveRadius * (isMobile ? 0.4 : 0.6);   // achata mais verticalmente
+  const adjustedIconSize = iconSize * (isMobile ? 0.6 : 1);
 
-  const adjustedRadius = effectiveRadius * radiusFactor;
-  const adjustedIconSize = iconSize * iconFactor;
-
-  const rows = Math.ceil(Math.sqrt(numSkills));
-  const cols = Math.ceil(numSkills / rows);
+  // Em vez de sqrt, vamos forçar mais colunas que linhas
+  const rows = Math.max(2, Math.floor(numSkills / 4)); // menos linhas
+  const cols = Math.ceil(numSkills / rows);            // mais colunas
 
   return skills.map((skill, index) => {
     const row = Math.floor(index / cols);
     const col = index % cols;
 
-    // Latitude (mais achatado verticalmente)
-    const lat = ((row / (rows - 1)) - 0.5) * Math.PI * 0.6; // 0.6 = achatamento
+    // Latitude achatada
+    const lat = ((row / (rows - 1)) - 0.5) * Math.PI * 0.5; // 0.5 = achatamento
+    // Longitude mais aberta
+    const lon = ((col / cols) * 2 * Math.PI) + angle;
 
-    // Longitude (mais espaçado horizontalmente)
-    const lon = ((col / cols) * 2.5 * Math.PI) + angle; // 2.5 para abrir mais
+    // Coords 3D simuladas
+    const x = horizontalRadius * Math.cos(lat) * Math.cos(lon);
+    const y = verticalRadius * Math.sin(lat);
+    const z = horizontalRadius * Math.cos(lat) * Math.sin(lon);
 
-    const x = adjustedRadius * Math.cos(lat) * Math.cos(lon);
-    const y = adjustedRadius * Math.sin(lat);
-    const z = adjustedRadius * Math.cos(lat) * Math.sin(lon);
-
-    const depthScale = (z + adjustedRadius) / (2 * adjustedRadius) * 0.5 + 0.5;
+    // Escala e profundidade
+    const depthScale = (z + horizontalRadius) / (2 * horizontalRadius) * 0.5 + 0.5;
     const zIndex = Math.round(depthScale * 100);
 
     return {
       ...skill,
       style: {
         transform: `translate(${x}px, ${y}px) scale(${depthScale})`,
-        zIndex: zIndex,
+        zIndex,
         width: `${adjustedIconSize}px`,
         height: `${adjustedIconSize}px`,
         marginTop: `-${adjustedIconSize / 2}px`,
