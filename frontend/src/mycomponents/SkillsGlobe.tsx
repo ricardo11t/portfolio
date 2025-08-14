@@ -14,7 +14,7 @@ interface SkillGlobeProps {
   iconSize?: number;
 }
 
-const SkillsGlobe: React.FC<SkillGlobeProps> = ({
+const SkillGlobe: React.FC<SkillGlobeProps> = ({
   skills = [],
   radius = 150,
   animationSpeed = 20,
@@ -31,7 +31,7 @@ const SkillsGlobe: React.FC<SkillGlobeProps> = ({
     let animationFrameId: number;
 
     const animate = () => {
-      setAngle((prevAngle) => prevAngle + 1 / animationSpeed);
+      setAngle((prevAngle) => (prevAngle + 1 / animationSpeed) % (2 * Math.PI));
       animationFrameId = requestAnimationFrame(animate);
     };
 
@@ -105,4 +105,4 @@ const SkillsGlobe: React.FC<SkillGlobeProps> = ({
   );
 };
 
-export default SkillsGlobe;
+export default SkillGlobe;
