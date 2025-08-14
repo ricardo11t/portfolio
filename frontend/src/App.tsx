@@ -464,7 +464,7 @@ useEffect(() => {
         <section id="skills" className={`py-20 bg-gradient-to-t ${theme === "dark" ? "from-black to-zinc-900" : "from-zinc-100 to-white"} scroll-mt-20`}>
             <h2 className={`text-3xl md:text-4xl text-center mb-12 ${theme === "dark" ? "text-white" : "text-zinc-900"}`}>Habilidades Técnicas</h2>
             <div className="w-full flex justify-center items-center h-96">
-                <SkillsGlobe skills={skills} animationSpeed={18} radius={200} theme={theme === "dark"? "dark" : "light"}/>
+                <SkillsGlobe images={skills}/>
             </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {skills.map((skill) => (
