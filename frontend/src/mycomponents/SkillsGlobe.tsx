@@ -16,14 +16,13 @@ interface SkillGlobeProps {
 
 const SkillGlobe: React.FC<SkillGlobeProps> = ({
   skills = [],
-  radius = 150, // Raio base, o globo crescerá a partir daqui
+  radius = 150,
   animationSpeed = 20,
   theme = "dark",
-  iconSize = 80, // Tamanho padrão do ícone em pixels
+  iconSize = 80,
 }) => {
   const [angle, setAngle] = useState(0);
 
-  // O raio efetivo agora é calculado dinamicamente.
   const effectiveRadius = useMemo(() => {
     return radius + skills.length * 4;
   }, [radius, skills.length]);
@@ -32,7 +31,6 @@ const SkillGlobe: React.FC<SkillGlobeProps> = ({
     let animationFrameId: number;
 
     const animate = () => {
-      // Usamos o operador de módulo (%) para manter o ângulo dentro de um ciclo completo (0 a 2*PI).
       setAngle((prevAngle) => (prevAngle + 1 / animationSpeed) % (2 * Math.PI));
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -46,29 +44,26 @@ const skillPositions = useMemo(() => {
   const numSkills = skills.length;
 
   const isMobile = window.innerWidth < 768;
-  const horizontalRadius = effectiveRadius * (isMobile ? 0.8 : 1.2); // abre mais no desktop
-  const verticalRadius = effectiveRadius * (isMobile ? 0.4 : 0.6);   // achata mais verticalmente
+  const horizontalRadius = effectiveRadius * (isMobile ? 0.8 : 1.2);
+  const verticalRadius = effectiveRadius * (isMobile ? 0.4 : 0.6);
   const adjustedIconSize = iconSize * (isMobile ? 0.6 : 1);
 
-  // Em vez de sqrt, vamos forçar mais colunas que linhas
-  const rows = Math.max(2, Math.floor(numSkills / 4)); // menos linhas
-  const cols = Math.ceil(numSkills / rows);            // mais colunas
+  const rows = Math.max(2, Math.floor(numSkills / 4));
+  const cols = Math.ceil(numSkills / rows);
 
   return skills.map((skill, index) => {
     const row = Math.floor(index / cols);
     const col = index % cols;
 
-    // Latitude achatada
-    const lat = ((row / (rows - 1)) - 0.5) * Math.PI * 0.5; // 0.5 = achatamento
-    // Longitude mais aberta
-    const lon = ((col / cols) * 2 * Math.PI) + angle;
+    const rowSpeed = 0.002 * row;
+    const lon = ((col / cols) * 2 * Math.PI) + angle * (1 + rowSpeed);
 
-    // Coords 3D simuladas
-    const x = horizontalRadius * Math.cos(lat) * Math.cos(lon);
+    const lat = ((row / (rows - 1)) - 0.5) * Math.PI * 0.5;
+
+    const x = horizontalRadius * Math.cos(lon);
     const y = verticalRadius * Math.sin(lat);
-    const z = horizontalRadius * Math.cos(lat) * Math.sin(lon);
+    const z = horizontalRadius * Math.sin(lon);
 
-    // Escala e profundidade
     const depthScale = (z + horizontalRadius) / (2 * horizontalRadius) * 0.5 + 0.5;
     const zIndex = Math.round(depthScale * 100);
 
