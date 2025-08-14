@@ -16,13 +16,14 @@ interface SkillGlobeProps {
 
 const SkillGlobe: React.FC<SkillGlobeProps> = ({
   skills = [],
-  radius = 150,
+  radius = 150, // Raio base, o globo crescerá a partir daqui
   animationSpeed = 20,
   theme = "dark",
-  iconSize = 80,
+  iconSize = 80, // Tamanho padrão do ícone em pixels
 }) => {
   const [angle, setAngle] = useState(0);
 
+  // O raio efetivo agora é calculado dinamicamente.
   const effectiveRadius = useMemo(() => {
     return radius + skills.length * 4;
   }, [radius, skills.length]);
@@ -31,6 +32,7 @@ const SkillGlobe: React.FC<SkillGlobeProps> = ({
     let animationFrameId: number;
 
     const animate = () => {
+      // Usamos o operador de módulo (%) para manter o ângulo dentro de um ciclo completo (0 a 2*PI).
       setAngle((prevAngle) => (prevAngle + 1 / animationSpeed) % (2 * Math.PI));
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -46,7 +48,11 @@ const SkillGlobe: React.FC<SkillGlobeProps> = ({
       const itemAngle = (index / numSkills) * 2 * Math.PI;
       const x = effectiveRadius * Math.cos(itemAngle + angle);
       const y = effectiveRadius * Math.sin(itemAngle + angle);
-      const scale = (y + effectiveRadius) / (2 * effectiveRadius) * 0.75 + 0.25;
+      
+      // ANOTAÇÃO: A FÓRMULA DE ESCALA FOI AJUSTADA.
+      // A escala agora varia de 0.5 a 1.0 (em vez de 0.25 a 1.0).
+      // Isso faz com que os ícones de "trás" fiquem maiores e menos aglomerados.
+      const scale = (y + effectiveRadius) / (2 * effectiveRadius) * 0.5 + 0.5;
       const zIndex = Math.round(scale * 100);
 
       return {
@@ -59,6 +65,7 @@ const SkillGlobe: React.FC<SkillGlobeProps> = ({
     });
   }, [skills, angle, effectiveRadius]);
 
+  // Define as classes de cor com base no tema
   const circleBgClass = theme === 'dark'
     ? 'bg-zinc-800 hover:bg-zinc-700'
     : 'bg-gray-200 hover:bg-gray-300';
@@ -104,5 +111,4 @@ const SkillGlobe: React.FC<SkillGlobeProps> = ({
     </div>
   );
 };
-
 export default SkillGlobe;
