@@ -42,30 +42,35 @@ const SkillGlobe: React.FC<SkillGlobeProps> = ({
     return () => cancelAnimationFrame(animationFrameId);
   }, [animationSpeed]);
 
-  const skillPositions = useMemo(() => {
-    const numSkills = skills.length;
-    return skills.map((skill, index) => {
-      const itemAngle = (index / numSkills) * 2 * Math.PI;
-      const x = effectiveRadius * Math.cos(itemAngle + angle);
-      const y = effectiveRadius * Math.sin(itemAngle + angle);
-      
-      // ANOTAÇÃO: A FÓRMULA DE ESCALA FOI AJUSTADA.
-      // A escala agora varia de 0.5 a 1.0 (em vez de 0.25 a 1.0).
-      // Isso faz com que os ícones de "trás" fiquem maiores e menos aglomerados.
-      const scale = (y + effectiveRadius) / (2 * effectiveRadius) * 0.5 + 0.5;
-      const zIndex = Math.round(scale * 100);
+const skillPositions = useMemo(() => {
+  const numSkills = skills.length;
+  const rows = Math.ceil(Math.sqrt(numSkills));
+  const cols = Math.ceil(numSkills / rows);
 
-      return {
-        ...skill,
-        style: {
-          transform: `translate(${x}px, ${y}px) scale(${scale})`,
-          zIndex: zIndex,
-        },
-      };
-    });
-  }, [skills, angle, effectiveRadius]);
+  return skills.map((skill, index) => {
+    const row = Math.floor(index / cols);
+    const col = index % cols;
 
-  // Define as classes de cor com base no tema
+    const lat = ((row / (rows - 1)) - 0.5) * Math.PI;
+    const lon = ((col / cols) * 2 * Math.PI) + angle;
+
+    const x = effectiveRadius * Math.cos(lat) * Math.cos(lon);
+    const y = effectiveRadius * Math.sin(lat);
+    const z = effectiveRadius * Math.cos(lat) * Math.sin(lon);
+
+    const depthScale = (z + effectiveRadius) / (2 * effectiveRadius) * 0.5 + 0.5;
+    const zIndex = Math.round(depthScale * 100);
+
+    return {
+      ...skill,
+      style: {
+        transform: `translate(${x}px, ${y}px) scale(${depthScale})`,
+        zIndex: zIndex,
+      },
+    };
+  });
+}, [skills, angle, effectiveRadius]);
+
   const circleBgClass = theme === 'dark'
     ? 'bg-zinc-800 hover:bg-zinc-700'
     : 'bg-gray-200 hover:bg-gray-300';
