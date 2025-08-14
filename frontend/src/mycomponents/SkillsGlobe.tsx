@@ -44,6 +44,15 @@ const SkillGlobe: React.FC<SkillGlobeProps> = ({
 
 const skillPositions = useMemo(() => {
   const numSkills = skills.length;
+
+  // Ajusta dinamicamente para telas menores
+  const isMobile = window.innerWidth < 768;
+  const radiusFactor = isMobile ? 0.6 : 1;
+  const iconFactor = isMobile ? 0.7 : 1;
+
+  const adjustedRadius = effectiveRadius * radiusFactor;
+  const adjustedIconSize = iconSize * iconFactor;
+
   const rows = Math.ceil(Math.sqrt(numSkills));
   const cols = Math.ceil(numSkills / rows);
 
@@ -51,14 +60,17 @@ const skillPositions = useMemo(() => {
     const row = Math.floor(index / cols);
     const col = index % cols;
 
-    const lat = ((row / (rows - 1)) - 0.5) * Math.PI;
-    const lon = ((col / cols) * 2 * Math.PI) + angle;
+    // Latitude (mais achatado verticalmente)
+    const lat = ((row / (rows - 1)) - 0.5) * Math.PI * 0.6; // 0.6 = achatamento
 
-    const x = effectiveRadius * Math.cos(lat) * Math.cos(lon);
-    const y = effectiveRadius * Math.sin(lat);
-    const z = effectiveRadius * Math.cos(lat) * Math.sin(lon);
+    // Longitude (mais espaçado horizontalmente)
+    const lon = ((col / cols) * 2.5 * Math.PI) + angle; // 2.5 para abrir mais
 
-    const depthScale = (z + effectiveRadius) / (2 * effectiveRadius) * 0.5 + 0.5;
+    const x = adjustedRadius * Math.cos(lat) * Math.cos(lon);
+    const y = adjustedRadius * Math.sin(lat);
+    const z = adjustedRadius * Math.cos(lat) * Math.sin(lon);
+
+    const depthScale = (z + adjustedRadius) / (2 * adjustedRadius) * 0.5 + 0.5;
     const zIndex = Math.round(depthScale * 100);
 
     return {
@@ -66,10 +78,14 @@ const skillPositions = useMemo(() => {
       style: {
         transform: `translate(${x}px, ${y}px) scale(${depthScale})`,
         zIndex: zIndex,
+        width: `${adjustedIconSize}px`,
+        height: `${adjustedIconSize}px`,
+        marginTop: `-${adjustedIconSize / 2}px`,
+        marginLeft: `-${adjustedIconSize / 2}px`,
       },
     };
   });
-}, [skills, angle, effectiveRadius]);
+}, [skills, angle, effectiveRadius, iconSize]);
 
   const circleBgClass = theme === 'dark'
     ? 'bg-zinc-800 hover:bg-zinc-700'
