@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 import type { NextFunction, Request, Response, ErrorRequestHandler } from "express";
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
 import ImagesController from "./controllers/imageController";
 import ImagesRepository from "./repositories/imagesRepository";
 import ImagesService from "./services/imageService";
@@ -35,11 +36,367 @@ const app = express();
 const router = Router();
 const PORT = process.env.PORT || 3000;
 
+const swaggerDocument = {
+    openapi: "3.0.3",
+    info: {
+        title: "Portfolio API",
+        version: "1.0.0",
+        description: "Documentação da API do portfólio"
+    },
+    servers: [
+        {
+            url: `http://localhost:${PORT}/api`
+        }
+    ],
+    tags: [
+        { name: "Images", description: "Gerenciamento de imagens" },
+        { name: "Skills", description: "Gerenciamento de skills" },
+        { name: "Projects", description: "Gerenciamento de projetos" }
+    ],
+    components: {
+        securitySchemes: {
+            ApiKeyAuth: {
+                type: "apiKey",
+                in: "header",
+                name: "Authorization",
+                description: "Use: ApiKey {SUA_CHAVE}"
+            }
+        },
+        schemas: {
+            Image: {
+                type: "object",
+                properties: {
+                    id: { type: "integer", example: 1 },
+                    name: { type: "string", example: "logo.png" },
+                    blob: { type: "string", example: "data:image/png;base64,..." }
+                }
+            },
+            Skill: {
+                type: "object",
+                properties: {
+                    id: { type: "integer", example: 1 },
+                    name: { type: "string", example: "TypeScript" },
+                    iconUrl: { type: "string", example: "https://.../ts.svg" },
+                    category: { type: "string", example: "frontend" }
+                }
+            },
+            Project: {
+                type: "object",
+                properties: {
+                    id: { type: "integer", example: 1 },
+                    title: { type: "string", example: "Portfolio" },
+                    description: { type: "string", example: "Meu projeto pessoal" },
+                    details: { type: "string", example: "Detalhes do projeto" },
+                    image_url: { type: "string", example: "https://.../image.png" },
+                    github_url: { type: "string", example: "https://github.com/..." },
+                    demo_url: { type: "string", example: "https://..." },
+                    skill_ids: { type: "array", items: { type: "integer", example: 1 } }
+                }
+            },
+            ErrorResponse: {
+                type: "object",
+                properties: {
+                    status: { type: "string", example: "error" },
+                    statusCode: { type: "integer", example: 400 },
+                    message: { type: "string", example: "Mensagem de erro" }
+                }
+            }
+        }
+    },
+    paths: {
+        "/images": {
+            get: {
+                tags: ["Images"],
+                summary: "Lista todas as imagens",
+                responses: {
+                    "200": {
+                        description: "Lista de imagens",
+                        content: {
+                            "application/json": {
+                                schema: { type: "array", items: { $ref: "#/components/schemas/Image" } }
+                            }
+                        }
+                    }
+                }
+            },
+            post: {
+                tags: ["Images"],
+                summary: "Cria uma imagem",
+                security: [{ ApiKeyAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["name", "blob"],
+                                properties: {
+                                    name: { type: "string" },
+                                    blob: { type: "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    "200": { description: "Imagem criada" },
+                    "400": { description: "Parâmetros inválidos", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "401": { description: "Não autorizado" },
+                    "403": { description: "Proibido" }
+                }
+            },
+            delete: {
+                tags: ["Images"],
+                summary: "Remove uma imagem",
+                security: [{ ApiKeyAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["name"],
+                                properties: {
+                                    name: { type: "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    "200": { description: "Imagem removida" },
+                    "400": { description: "Parâmetro inválido", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "401": { description: "Não autorizado" },
+                    "403": { description: "Proibido" }
+                }
+            }
+        },
+        "/skills": {
+            get: {
+                tags: ["Skills"],
+                summary: "Lista todas as skills",
+                responses: {
+                    "200": {
+                        description: "Lista de skills",
+                        content: {
+                            "application/json": {
+                                schema: { type: "array", items: { $ref: "#/components/schemas/Skill" } }
+                            }
+                        }
+                    }
+                }
+            },
+            post: {
+                tags: ["Skills"],
+                summary: "Cria uma skill",
+                security: [{ ApiKeyAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["name", "iconUrl", "category"],
+                                properties: {
+                                    name: { type: "string" },
+                                    iconUrl: { type: "string" },
+                                    category: { type: "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    "200": { description: "Skill criada" },
+                    "400": { description: "Parâmetros inválidos", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "401": { description: "Não autorizado" },
+                    "403": { description: "Proibido" }
+                }
+            },
+            delete: {
+                tags: ["Skills"],
+                summary: "Remove uma skill",
+                security: [{ ApiKeyAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["name"],
+                                properties: {
+                                    name: { type: "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    "200": { description: "Skill removida" },
+                    "400": { description: "Parâmetro inválido", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "401": { description: "Não autorizado" },
+                    "403": { description: "Proibido" }
+                }
+            }
+        },
+        "/skills/{id}": {
+            put: {
+                tags: ["Skills"],
+                summary: "Atualiza uma skill",
+                security: [{ ApiKeyAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string" }
+                    }
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    name: { type: "string" },
+                                    iconUrl: { type: "string" },
+                                    category: { type: "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    "200": { description: "Skill atualizada" },
+                    "400": { description: "Parâmetro inválido", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "401": { description: "Não autorizado" },
+                    "403": { description: "Proibido" }
+                }
+            }
+        },
+        "/projects": {
+            get: {
+                tags: ["Projects"],
+                summary: "Lista todos os projetos",
+                responses: {
+                    "200": {
+                        description: "Lista de projetos",
+                        content: {
+                            "application/json": {
+                                schema: { type: "array", items: { $ref: "#/components/schemas/Project" } }
+                            }
+                        }
+                    }
+                }
+            },
+            post: {
+                tags: ["Projects"],
+                summary: "Cria um projeto",
+                security: [{ ApiKeyAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["title", "description", "skill_ids"],
+                                properties: {
+                                    title: { type: "string" },
+                                    description: { type: "string" },
+                                    details: { type: "string" },
+                                    image_url: { type: "string" },
+                                    github_url: { type: "string" },
+                                    demo_url: { type: "string" },
+                                    skill_ids: { type: "array", items: { type: "integer" } }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    "201": { description: "Projeto criado" },
+                    "400": { description: "Parâmetros inválidos", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "401": { description: "Não autorizado" },
+                    "403": { description: "Proibido" }
+                }
+            },
+            delete: {
+                tags: ["Projects"],
+                summary: "Remove um projeto",
+                security: [{ ApiKeyAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                required: ["id"],
+                                properties: {
+                                    id: { type: "integer" }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    "200": { description: "Projeto removido" },
+                    "400": { description: "Parâmetro inválido", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "401": { description: "Não autorizado" },
+                    "403": { description: "Proibido" }
+                }
+            }
+        },
+        "/projects/{id}": {
+            put: {
+                tags: ["Projects"],
+                summary: "Atualiza um projeto",
+                security: [{ ApiKeyAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string" }
+                    }
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    title: { type: "string" },
+                                    description: { type: "string" },
+                                    details: { type: "string" },
+                                    image_url: { type: "string" },
+                                    github_url: { type: "string" },
+                                    demo_url: { type: "string" },
+                                    skill_ids: { type: "array", items: { type: "integer" } }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    "200": { description: "Projeto atualizado" },
+                    "400": { description: "Parâmetro inválido", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "401": { description: "Não autorizado" },
+                    "403": { description: "Proibido" }
+                }
+            }
+        }
+    }
+};
+
 app.use(express.json({ limit: '50mb' }));
 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(cors());
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/", (req: Request, res: Response) => {
     return res.json({ message: "API está online!" });
