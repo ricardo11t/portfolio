@@ -35,6 +35,7 @@ const projectsController = new ProjectsController(projectsService);
 const app = express();
 const router = Router();
 const PORT = process.env.PORT || 3000;
+const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 
 const swaggerDocument = {
     openapi: "3.0.3",
@@ -45,7 +46,7 @@ const swaggerDocument = {
     },
     servers: [
         {
-            url: `http://localhost:${PORT}/api`
+            url: `${API_BASE_URL}/api`
         }
     ],
     tags: [
