@@ -19,6 +19,7 @@ services:
       - DB_DATABASE=${MYSQL_DATABASE}
       - PORT=3000
       - API_SECRET_KEY=${API_SECRET_KEY}
+      - API_BASE_URL=${API_BASE_URL}
     ports:
       - "3001:3000"
     depends_on:
